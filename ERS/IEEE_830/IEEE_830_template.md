@@ -2667,9 +2667,26 @@ los requisitos. Son parte integral del SRS.
 Los casos de uso describen interacciones completas entre actores y el sistema
 para lograr un objetivo específico. Complementan los requisitos funcionales
 proporcionando contexto y flujos de trabajo.
-
-ESTRUCTURA DE UN CASO DE USO:
 -->
+
+**Lista de Casos de Uso del Sistema:**
+
+- **CU-001**: Realizar Préstamo de Material (documentado arriba)
+- 
+- **CU-002**: Realizar Devolución de Material
+- **CU-003**: Registrar Nuevo Usuario
+- **CU-004**: Buscar Material en Catálogo
+- **CU-005**: Crear Reserva de Material
+- **CU-006**: Renovar Préstamo
+- **CU-007**: Procesar Pago de Multa
+- **CU-008**: Generar Reporte de Materiales Más Prestados
+- **CU-009**: Configurar Parámetros del Sistema
+- **CU-010**: Realizar Respaldo de Datos
+- ... [continuar según necesidad]
+<br>
+
+<!--
+ESTRUCTURA DE UN CASO DE USO:
 
 **Plantilla de Caso de Uso:**
 
@@ -2686,9 +2703,9 @@ ESTRUCTURA DE UN CASO DE USO:
 | **Flujos de Excepción** | **3a**. Si [error]:<br>  3a1. [Manejo del error]<br>  3a2. [Fin del caso de uso o recuperación] |
 | **Requisitos Relacionados** | [RF-XXX, RF-YYY] |
 
----
-
 **Ejemplo Completo:**
+-->
+
 
 **CU-001: Realizar Préstamo de Material**
 
@@ -2696,40 +2713,230 @@ ESTRUCTURA DE UN CASO DE USO:
 |-------|-------------|
 | **ID** | CU-001 |
 | **Nombre** | Realizar Préstamo de Material |
-| **Actores** | **Bibliotecario** (primario), **Usuario de biblioteca** (secundario) |
-| **Descripción** | Permite al bibliotecario registrar el préstamo de uno o más materiales bibliográficos a un usuario de la biblioteca, validando su elegibilidad y la disponibilidad de los recursos. |
-| **Precondiciones** | 1. El bibliotecario ha iniciado sesión en el sistema con credenciales válidas<br>2. El usuario está registrado y activo en el sistema<br>3. Los materiales solicitados existen en el catálogo de la biblioteca |
-| **Postcondiciones Exitosas** | 1. El préstamo queda registrado en el sistema con timestamp<br>2. Los materiales cambian a estado "Prestado" con información del prestatario<br>3. Se genera comprobante de préstamo con código único<br>4. Se calcula y registra la fecha de devolución según política vigente<br>5. El usuario recibe notificación por correo electrónico (si está habilitado) |
-| **Postcondiciones de Fallo** | 1. No se registra ningún préstamo<br>2. Los materiales mantienen su estado original<br>3. Se registra el intento fallido en log del sistema |
-| **Flujo Principal** | 1. El bibliotecario selecciona la opción "Nuevo Préstamo"<br>2. El sistema solicita identificación del usuario<br>3. El bibliotecario escanea el carnet del usuario o ingresa número de identificación manualmente<br>4. El sistema valida el carnet y muestra información del usuario (nombre, tipo, foto)<br>5. **El sistema valida el estado del usuario y muestra:**<br>&nbsp;&nbsp;&nbsp;- Préstamos activos (cantidad actual / límite permitido)<br>&nbsp;&nbsp;&nbsp;- Multas pendientes (si las hay)<br>&nbsp;&nbsp;&nbsp;- Estado de la cuenta (Activo/Suspendido)<br>6. **Si el usuario tiene multas vencidas (>30 días) o está suspendido, ir a Flujo de Excepción 5a**<br>7. El bibliotecario escanea código de barras del material a prestar<br>8. El sistema valida que el material está disponible y lo agrega a la lista de préstamos<br>9. El bibliotecario repite pasos 7-8 para cada material adicional (hasta el límite permitido)<br>10. El bibliotecario confirma el préstamo<br>11. El sistema calcula fecha de devolución según tipo de material y categoría de usuario<br>12. El sistema registra la transacción de préstamo en la base de datos<br>13. El sistema muestra resumen del préstamo y opción de imprimir comprobante<br>14. El bibliotecario imprime o envía comprobante digital al usuario<br>15. Fin del caso de uso |
-| **Flujos Alternativos** | **4a. Usuario no encontrado en el sistema:**<br>&nbsp;&nbsp;4a1. El sistema muestra mensaje "Usuario no encontrado. Número de carnet: [XXXX]"<br>&nbsp;&nbsp;4a2. El sistema ofrece las opciones: "Registrar nuevo usuario" o "Reintentar búsqueda"<br>&nbsp;&nbsp;4a3. Si el bibliotecario selecciona "Registrar nuevo usuario", ir a CU-010<br>&nbsp;&nbsp;4a4. Si el bibliotecario selecciona "Reintentar", volver al paso 2<br>&nbsp;&nbsp;4a5. Si el bibliotecario cancela, fin del caso de uso<br><br>**8a. Material no disponible:**<br>&nbsp;&nbsp;8a1. El sistema muestra mensaje "Material no disponible" con el estado actual:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- **Prestado:** "Prestado hasta [fecha]. Usuario: [nombre]"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- **En reparación:** "En proceso de reparación. Fecha estimada: [fecha]"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- **Perdido:** "Reportado como perdido"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- **Reservado:** "Reservado por otro usuario"<br>&nbsp;&nbsp;8a2. Si el material está prestado, el sistema ofrece opción "Crear reserva" → CU-030<br>&nbsp;&nbsp;8a3. El sistema NO agrega el material a la lista de préstamo actual<br>&nbsp;&nbsp;8a4. Volver al paso 7<br><br>**9a. Límite de materiales alcanzado:**<br>&nbsp;&nbsp;9a1. El sistema muestra advertencia: "El usuario ha alcanzado el límite de [X] materiales simultáneos para su categoría"<br>&nbsp;&nbsp;9a2. El sistema NO permite agregar más materiales a la lista<br>&nbsp;&nbsp;9a3. El bibliotecario puede eliminar materiales de la lista o continuar al paso 10<br><br>**14a. Usuario solicita comprobante digital:**<br>&nbsp;&nbsp;14a1. El bibliotecario selecciona opción "Enviar por correo"<br>&nbsp;&nbsp;14a2. El sistema envía comprobante PDF al correo registrado del usuario<br>&nbsp;&nbsp;14a3. El sistema confirma envío exitoso<br>&nbsp;&nbsp;14a4. Continuar al paso 15 |
-| **Flujos de Excepción** | **5a. Usuario con multas vencidas o suspendido:**<br>&nbsp;&nbsp;5a1. El sistema muestra mensaje de bloqueo:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "Usuario SUSPENDIDO. Motivo: [razón]. Vigencia hasta: [fecha]", O<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "Usuario tiene multas vencidas por: $[monto]. Días de atraso: [X]"<br>&nbsp;&nbsp;5a2. El sistema NO permite continuar con el préstamo<br>&nbsp;&nbsp;5a3. El sistema ofrece las opciones:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "Registrar pago de multa" → CU-020<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "Ver detalle de multas" → CU-021<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "Cancelar operación"<br>&nbsp;&nbsp;5a4. Fin del caso de uso<br><br>**12a. Error de integridad en base de datos:**<br>&nbsp;&nbsp;12a1. El sistema detecta error al intentar registrar la transacción<br>&nbsp;&nbsp;12a2. El sistema ejecuta ROLLBACK automático de la transacción<br>&nbsp;&nbsp;12a3. El sistema muestra mensaje: "Error al procesar préstamo. Código: [ERR-XXX]. Contacte al administrador si persiste"<br>&nbsp;&nbsp;12a4. El sistema registra en log: timestamp, usuario, materiales, tipo de error, stack trace<br>&nbsp;&nbsp;12a5. NO se registra el préstamo en la base de datos<br>&nbsp;&nbsp;12a6. NO se modifica el estado de los materiales<br>&nbsp;&nbsp;12a7. El bibliotecario puede reintentar desde el paso 10 o cancelar la operación<br>&nbsp;&nbsp;12a8. Fin del caso de uso<br><br>**12b. Pérdida de conexión a la base de datos:**<br>&nbsp;&nbsp;12b1. El sistema detecta timeout o pérdida de conexión<br>&nbsp;&nbsp;12b2. El sistema muestra: "Error de conexión. Verificando estado del sistema..."<br>&nbsp;&nbsp;12b3. El sistema intenta reconexión automática (3 intentos)<br>&nbsp;&nbsp;12b4. Si la reconexión falla, mostrar: "Sistema temporalmente no disponible. Intente nuevamente en unos minutos"<br>&nbsp;&nbsp;12b5. El bibliotecario debe reiniciar el proceso desde el paso 1<br>&nbsp;&nbsp;12b6. Fin del caso de uso |
-| **Requisitos Funcionales** | RF-030: Registro de préstamo de materiales<br>RF-031: Validación de disponibilidad de material<br>RF-032: Validación de estado y elegibilidad de usuario<br>RF-033: Generación de comprobante de préstamo<br>RF-034: Cálculo automático de fecha de devolución<br>RF-035: Notificación por correo electrónico |
-| **Requisitos No Funcionales** | RNF-001: Tiempo de respuesta < 3 segundos para validaciones<br>RNF-004: Integridad transaccional (ACID)<br>RNF-007: Disponibilidad del sistema 99.5%<br>RNF-012: Registro de auditoría de todas las operaciones |
-| **Reglas de Negocio** | RN-001: Límite de préstamos simultáneos según tipo de usuario<br>RN-002: Período de préstamo según tipo de material<br>RN-003: Usuario suspendido por multas vencidas > 30 días<br>RN-004: Multa diaria por retraso en devolución |
----
+| **Actores** | Bibliotecario (primario), Usuario de biblioteca (secundario), Sistema de gestión BiblioTech |
+| **Descripción** | Permite al bibliotecario registrar el préstamo de uno o más materiales bibliográficos a un usuario de la biblioteca. |
+| **Precondiciones** | 1. El bibliotecario ha iniciado sesión en el sistema<br>2. El usuario está registrado en el sistema<br>3. El usuario NO está suspendido ni tiene multas vencidas<br>4. Los materiales están disponibles para préstamo |
+| **Postcondiciones** | 1. El préstamo queda registrado en el sistema<br>2. Los materiales cambian a estado "Prestado"<br>3. Se genera comprobante de préstamo<br>4. El usuario recibe notificación por correo (opcional) |
+| **Flujo Principal** | 1. El bibliotecario selecciona la opción "Nuevo Préstamo"<br>2. El sistema solicita identificación del usuario<br>3. El bibliotecario escanea el carnet del usuario o ingresa número de carnet manualmente<br>4. El sistema valida el carnet y muestra información del usuario<br>5. El sistema muestra si el usuario tiene préstamos activos, multas pendientes, o está suspendido<br>6. El bibliotecario escanea código de barras del material a prestar<br>7. El sistema valida que el material está disponible y lo agrega a la lista de préstamos<br>8. El bibliotecario repite paso 6-7 para cada material adicional (hasta el límite permitido)<br>9. El bibliotecario confirma el préstamo<br>10. El sistema calcula fecha de devolución según política de préstamo<br>11. El sistema registra el préstamo en la base de datos<br>12. El sistema muestra resumen del préstamo y opción de imprimir comprobante<br>13. El bibliotecario imprime comprobante y lo entrega al usuario<br>14. Fin del caso de uso |
+| **Flujos Alternativos** | **4a. Usuario no encontrado**:<br>  4a1. El sistema muestra mensaje "Usuario no encontrado"<br>  4a2. El sistema ofrece opción "Registrar nuevo usuario"<br>  4a3. Si el bibliotecario selecciona registrar, ir a CU-010 (Registrar Usuario)<br>  4a4. Si el bibliotecario cancela, volver al paso 2<br><br>**7a. Material no disponible**:<br>  7a1. El sistema muestra mensaje "Material no disponible. Estado: [Prestado/En reparación/Perdido]"<br>  7a2. Si está prestado, el sistema ofrece opción "Crear reserva"<br>  7a3. El sistema NO agrega el material a la lista<br>  7a4. Volver al paso 6<br><br>**8a. Límite de materiales alcanzado**:<br>  8a1. El sistema muestra mensaje "El usuario ha alcanzado el límite de [X] materiales simultáneos"<br>  8a2. El sistema NO permite agregar más materiales<br>  8a3. Continuar al paso 9 |
+| **Flujos de Excepción** | **5a. Usuario suspendido o con multas vencidas**:<br>  5a1. El sistema muestra advertencia "Usuario suspendido" o "Usuario tiene multas vencidas por $[monto]"<br>  5a2. El sistema NO permite continuar con el préstamo<br>  5a3. El sistema ofrece opción "Registrar pago de multa"<br>  5a4. Fin del caso de uso<br><br>**11a. Error al registrar préstamo (error de BD)**:<br>  11a1. El sistema muestra mensaje "Error al procesar préstamo. Intente nuevamente"<br>  11a2. El sistema registra el error en log con detalles técnicos<br>  11a3. NO se registra el préstamo<br>  11a4. NO se cambia el estado de los materiales<br>  11a5. El bibliotecario puede reintentar desde el paso 9 o cancelar<br>  11a6. Fin del caso de uso |
+| **Requisitos Relacionados** | RF-030 (Registro de préstamo)<br>RF-031 (Validación de disponibilidad)<br>RF-032 (Validación de estado de usuario)<br>RF-033 (Generación de comprobante)<br>RNF-004 (Integridad transaccional)<br>RNFR-001 (Tiempo de respuesta) |
+<br>
+
+<!--
+sobre LOS SUBCASOS DE USO:
+
+Un **subcaso de uso** es un caso de uso que:
+1. **NO puede ejecutarse de forma independiente**
+2. **Siempre es invocado por otro caso de uso** (relación <<include>>)
+3. **Representa funcionalidad compartida** por múltiples casos de uso
+4. **Es un fragmento funcional** del sistema, no un proceso completo
+
+Documenta un subcaso de uso cuando:
+1. Es INCLUIDO (<<include>>) por 2+ casos de uso, Y
+2. Tiene complejidad suficiente que merece especificación separada
+
+**Ejemplos:**
+- Validar Credenciales de Usuario (usado en Login, Cambiar Contraseña, Desbloquear Cuenta)
+- Calcular Costo Total con Impuestos (usado en Ver Carrito, Generar Factura, Procesar Pago)
+- Verificar Disponibilidad de Inventario (usado en Agregar a Carrito, Crear Pedido, Reservar)
+
+
+NO documentes un subcaso cuando:
+- Es usado por un solo CU (documéntalo como parte del CU principal)
+- Es trivial (1-2 pasos simples)
+
+**Ejemplos de NO subcasos:**
+- Cerrar Sesión (trivial: 1 paso)
+- Guardar Log (técnico, no lógica de negocio)
+- Actualizar Timestamp (trivial)
+- Formatear Fecha para Mostrar (técnico)
+
+¿CÓMO DOCUMENTAR UN SUBCASO DE USO?
+
+opcion 1: **Plantilla de Subcaso de Uso:**
+
+| **Campo**                   | **Descripción**                                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **ID**                      | CU-XXX.Y (donde XXX es el CU padre y Y es el número de subcaso)                                                                      |
+| **Nombre**                  | [Nombre descriptivo del subcaso]                                                                                                     |
+| **Tipo**                    | Subcaso de uso (<> del caso padre)                                                                                                   |
+| **Usado por**               | CU-AAA, CU-BBB, CU-CCC (casos de uso que lo invocan)                                                                                 |
+| **Descripción**             | [Descripción del propósito del subcaso y su relación con el CU padre]                                                                |
+| **Precondiciones**          | [Estado que debe existir antes de ejecutar este subcaso]                                                                             |
+| **Postcondiciones**         | [Estado resultante después de ejecutar este subcaso]                                                                                 |
+| **Entradas**                | [Datos o parámetros que recibe del caso de uso padre]                                                                                |
+| **Salidas**                 | [Datos o resultados que devuelve al caso de uso padre]                                                                               |
+| **Flujo Principal**         | 1. [Paso 1]<br>2. [Paso 2]<br>3. [Paso 3]<br>...                                                                                     |
+| **Flujos Alternativos**     | **2a**. Si [condición]:<br>  2a1. [Paso alternativo]<br>  2a2. [Retornar al paso X del flujo principal]                              |
+| **Excepciones**             | **3a**. Si [error o evento inesperado]:<br>  3a1. [Acción de manejo o notificación]<br>  3a2. [Fin del subcaso o retorno controlado] |
+| **Reglas de Negocio**       | [RB-XXX, RB-YYY, u otras reglas que aplican]                                                                                         |
+| **Requisitos Relacionados** | [RF-XXX, RF-YYY]                                                                                                                     |
+<br>
+-->
+
+| **Campo**                                | **Descripción**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ID**                                   | **CU-VAL-001**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Nombre**                               | Validar Credenciales de Usuario                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Tipo**                                 | Subcaso de uso (<<include>>)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Usado por**                            | • CU-001: Login al Sistema<br>• CU-025: Cambiar Contraseña<br>• CU-030: Desbloquear Cuenta<br>• CU-045: Autorizar Operación Crítica                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Descripción**                          | Valida que las credenciales proporcionadas (usuario + contraseña) son correctas y que la cuenta está en condiciones de ser utilizada. Verifica contra la base de datos de usuarios, valida el hash de la contraseña y comprueba el estado de la cuenta. Este subcaso encapsula toda la lógica de autenticación para garantizar consistencia en todo el sistema.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Precondiciones**                       | 1. El sistema está conectado a la base de datos de usuarios.<br>2. Los datos de entrada (usuario y contraseña) no son nulos ni vacíos.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Postcondiciones (Éxito)**              | 1. Las credenciales son válidas.<br>2. Se registra intento exitoso en log de auditoría.<br>3. Se actualiza fecha/hora de último acceso del usuario.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Postcondiciones (Fallo)**              | 1. Las credenciales NO son válidas (usuario no existe o contraseña incorrecta).<br>2. Se registra intento fallido en log de auditoría.<br>3. Se incrementa contador de intentos fallidos.<br>4. Si contador alcanza 5 → Se bloquea cuenta temporalmente (30 min).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Entradas**                             | **nombre_usuario** *(String)*: Nombre de usuario o email (**Obligatorio**).<br>**contraseña** *(String)*: Contraseña en texto plano (**Obligatorio**).<br>**ip_origen** *(String)*: Dirección IP del cliente (Opcional, para auditoría).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Salidas**                              | **resultado** *(Boolean)*: TRUE si credenciales válidas, FALSE si inválidas.<br>**motivo_fallo** *(String)*: Si resultado=FALSE → “usuario_no_existe” / “contraseña_incorrecta” / “cuenta_bloqueada”.<br>**usuario_id** *(Integer)*: Si resultado=TRUE → ID del usuario autenticado.<br>**datos_usuario** *(Object)*: Si resultado=TRUE → Objeto con nombre, rol y permisos.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Flujo Principal**                      | 1. Recibir parámetros de entrada (nombre_usuario, contraseña, ip_origen).<br>2. Buscar usuario en base de datos por nombre_usuario.<br>3. Si usuario no encontrado → Ir a Excepción 3a.<br>4. Verificar hash de contraseña:<br> • Obtener hash almacenado y salt.<br> • Calcular hash de contraseña proporcionada.<br> • Comparar hashes.<br>5. Si hashes no coinciden → Ir a Excepción 5a.<br>6. Verificar estado de cuenta:<br> • estado = “activo”<br> • intentos_fallidos < 5<br> • bloqueo_hasta IS NULL o < AHORA().<br>7. Si cuenta bloqueada o inactiva → Ir a Excepción 7a.<br>8. **Credenciales válidas:** Resetear intentos_fallidos = 0; actualizar fecha e IP último acceso.<br>9. Registrar en log de auditoría (“login_exitoso”).<br>10. Retornar resultado=TRUE, usuario_id, datos_usuario.<br>11. **Fin del Subcaso – Éxito.** |
+| **Flujos Alternativos**                  | **Ninguno** (todos los caminos no exitosos se manejan como excepciones).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Flujos de Excepción**                  | **3a – Usuario no encontrado:**<br>1. Registrar en log “intento_login_usuario_inexistente”.<br>2. No revelar si el usuario existe o no (seguridad).<br>3. Retornar resultado=FALSE, motivo_fallo="credenciales_invalidas".<br>4. **Fin – Fallo.**<br><br>**5a – Contraseña incorrecta:**<br>1. Incrementar intentos_fallidos.<br>2. Si >=5, bloquear cuenta 30 min y notificar por email.<br>3. Registrar en log “intento_login_contraseña_incorrecta”.<br>4. Retornar resultado=FALSE, motivo_fallo="credenciales_invalidas".<br>5. **Fin – Fallo.**<br><br>**7a – Cuenta bloqueada o inactiva:**<br>1. Determinar motivo: “cuenta_inactiva”, “bloqueada_temporalmente” o “bloqueada_por_seguridad”.<br>2. Registrar en log.<br>3. Retornar resultado=FALSE, motivo_fallo=[motivo].<br>4. **Fin – Fallo.**                                     |
+| **Reglas de Negocio**                    | **RN-SEC-001:** Las contraseñas NUNCA se almacenan en texto plano (usar bcrypt cost=12).<br>**RN-SEC-002:** Después de 5 intentos fallidos, la cuenta se bloquea por 30 minutos.<br>**RN-SEC-003:** Los mensajes de error no deben revelar si el usuario existe o no.<br>**RN-SEC-004:** Todos los intentos (éxito/fallo) se registran en log de auditoría.<br>**RN-SEC-005:** El bloqueo temporal se resetea automáticamente después de 30 min.                                                                                                                                                                                                                                                                                                                                                                                                |
+| **Requisitos No Funcionales Aplicables** | **RNFS-001:** Almacenamiento seguro de contraseñas (bcrypt).<br>**RNFS-002:** Protección contra fuerza bruta (bloqueo tras 5 intentos).<br>**RNFR-001:** Tiempo de respuesta < 500 ms.<br>**RNFS-006:** Auditoría de seguridad (registro completo de intentos).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Casos de Prueba del Subcaso**          | **TC-VAL-001:** Credenciales válidas → resultado=TRUE, usuario_id retornado.<br>**TC-VAL-002:** Usuario no existe → resultado=FALSE, motivo="credenciales_invalidas".<br>**TC-VAL-003:** Contraseña incorrecta → resultado=FALSE, intentos_fallidos++.<br>**TC-VAL-004:** 5to intento fallido → cuenta bloqueada 30 min.<br>**TC-VAL-005:** Cuenta inactiva → resultado=FALSE, motivo="cuenta_inactiva".<br>**TC-VAL-006:** Login durante bloqueo → resultado=FALSE, motivo="cuenta_bloqueada".                                                                                                                                                                                                                                                                                                                                                 |
+
+<!-- 
+Opción 2: Plantilla para Subcasos Simples
+
+Para subcasos simples pero que aún merecen documentación separada:
+
+| **Campo**           | **Descripción**                                                  |
+| ------------------- | ---------------------------------------------------------------- |
+| **ID**              | CU-XXX.Y                                                         |
+| **Nombre**          | [Nombre del Subcaso]                                             |
+| **Usado por**       | CU-AAA, CU-BBB                                                   |
+| **Propósito**       | [Breve descripción: qué hace y por qué existe el subcaso]        |
+| **Entradas**        | [Datos o parámetros que recibe del caso de uso padre]            |
+| **Salidas**         | [Datos o resultados que retorna al caso de uso padre]            |
+| **Flujo Principal** | 1. [Paso 1]<br>2. [Paso 2]<br>3. [Paso 3]                        |
+| **Excepciones**     | [Descripción de las excepciones o errores manejados, si los hay] |
+
+
+Opción 3: **Documentación Inline (No es Subcaso Separado)**
+
+Cuando NO merece subcaso separado, documentar directamente en el flujo principal:
+
+CU-001: Realizar Préstamo
+
+Flujo Principal
+1. El bibliotecario selecciona "Nuevo Préstamo"
+2. El sistema solicita identificación del usuario
+3. El bibliotecario ingresa carnet
+4. **El sistema valida estado del usuario:**
+   4.1. Verifica que usuario existe en BD
+   4.2. Verifica que usuario.estado = "activo"
+   4.3. Verifica que multas vencidas = 0
+   4.4. Si alguna validación falla → Excepción 4a
+5. El sistema muestra información del usuario
+-->
+
+
+<!--
+## ERRORES COMUNES
+
+### **Error 1: Documentar todo como subcaso**
+
+**Incorrecto:**
+
+CU-001: Login
+  └─ CU-001.1: Mostrar Formulario de Login  ← NO merece subcaso
+  └─ CU-001.2: Validar Formato de Email     ← Trivial
+  └─ CU-001.3: Verificar Credenciales       ← SÍ es subcaso
+  └─ CU-001.4: Crear Sesión                 ← Trivial
+  └─ CU-001.5: Redirigir a Dashboard        ← Trivial
+
+
+**Correcto:**
+
+CU-001: Login
+  Pasos inline: 1-10
+  Paso 4: [Subcaso incluido: CU-VAL-001 Verificar Credenciales]
+  Otros pasos: documentados inline
+
+
+### **Error 2: Confundir subcaso con función técnica**
+
+**Incorrecto subcaso:**
+
+CU-LOG-001: Escribir en Log
+  Propósito: Guardar mensaje en archivo de log
+
+  Flujo:
+  1. Abrir archivo log en modo append
+  2. Escribir timestamp + nivel + mensaje
+  3. Cerrar archivo
+
+
+**Problema:** Esto es una **función técnica**, no un subcaso de uso. No tiene lógica de negocio, no le importa al usuario final.
+
+**Correcto:** Documentar como función en documentación técnica, no como caso de uso.
+
+
+### **Error 3: Subcasos demasiado granulares**
+
+**Incorrecto:**
+
+CU-001: Realizar Préstamo
+  └─ CU-001.1: Validar Usuario
+       └─ CU-001.1.1: Verificar Usuario Existe
+       └─ CU-001.1.2: Verificar Usuario Activo
+       └─ CU-001.1.3: Verificar Sin Multas
+
+
+**Problema:** Demasiada granularidad. Los sub-subcasos rara vez son necesarios.
+
+**Correcto:**
+
+CU-001: Realizar Préstamo
+  └─ CU-001.1: Validar Usuario
+       Pasos dentro del subcaso:
+       1. Verificar usuario existe
+       2. Verificar usuario activo
+       3. Verificar sin multas vencidas
+
+
+
+### **Error 4: Mezclar subcasos con flujos alternativos**
+
+**Incorrecto:**
+
+CU-001: Login
+  └─ CU-001.1: Login con Google      ← NO es subcaso, es alternativa
+  └─ CU-001.2: Login con Facebook    ← NO es subcaso, es alternativa
+  └─ CU-001.3: Login tradicional     ← NO es subcaso, es alternativa
+
+
+**Problema:** Estos son **flujos alternativos** del mismo caso de uso, no subcasos.
+
+**Correcto:**
+
+CU-001: Login
+
+Flujo Principal:
+1. Usuario selecciona método de autenticación
+
+Flujo Alternativo 1a: Login con Google
+  1a1. Sistema redirige a OAuth de Google
+  1a2. ...
+
+Flujo Alternativo 1b: Login con Facebook
+  1b1. Sistema redirige a OAuth de Facebook
+  1b2. ...
+
+-->
+
 
 **Diagrama de Casos de Uso:**
 
 [Incluya aquí un diagrama UML de casos de uso mostrando actores y casos de uso principales con sus relaciones (include, extend). Puede crearlo con herramientas como draw.io, Lucidchart, PlantUML, o incluso a mano]
 
-[![](https://img.plantuml.biz/plantuml/svg/XLRDRXit4BxlKqpbGoNLSlNdfZ5i8vOi9G7iE92iNA8W62qfYGv5RhXSftLH8ASyG1-Xjvxx27cJF4c7vEvg_LC75cmjvnlEp3VVpFfPQj7OR2EZ7nXV2iNXxENp5vU3iza8TaQzSNTyMbh2ORVpz9TnBqe_29MWmGqa67_05P_QtoK7msEBQYLv1P2bFCQKmnyHm830AwCpnOPQQhEDvcpQC6x2UNvqOep-L3dvCuf-XB4sDsY02GeMYw__Ah0wQLdTMcXhjKl886pu5Jbfiq8bRZ30hhcn8aOP4Pvy8CVxYwpGAegii5J4SDPgjpi7CE4eXGlrsdpzXuZQQ60Spj5o8r3ELVqDDwc_-Tn5GuRGWejR8IyIApRqnB3XKZywEeAJs6h3KwXBP1h4pSTCSCDqmnaZT4Qe3SH22cs9DoDq3J250UoCnwFshzq2CaipPwICvceBzzYPmmw7Ws4HSYfIopVe8vGTWbfn7DmlURokaUU--_7Dea_m7sBgIy_eJsA4YaM24kenLzReLfebH8WseG8e-rrhDWEJpUPStUTohYfa-ho7CmB3pc1mEXeFgl6dsO9kr2beIdI5LB-WXpeb8ZF66yJwgKWJdOhRVRwRpnjAWL4A8uhFGloSnMtuzvs7FFprIYo4UsJ_a_dxRjLrmbT4hxbTSVtIe4enb-t9yELfe-BVg_e_vuexxw7U94OlK5dkuvQtLHpx3v05Eeb9qwvF_3VB5NCqJRaR3f8TWaJgA8bXZNTf6gbhGO5VQIkMHAFFTQuIxN8nXbS3xpkbZPyEomHkgv-dj1o88rYwaML8a9naQBrT2yQuUiVq9zMg49X_UnZGAm6zXm7zi28S3nCkqJ50enPh1PYFdIjs02qZLclREiurTm12aNWmci6Uj-oL1bowWI7AY807hZuyp5LuV0prhJmnzQhaANKiZ0ci7HM02xpIFeaGO6_lkEJae7hRFNltE_RUT-pzE_PRjRXk7Hu6eVXASl5igwYAfMX-URc_kl2UgxUn5mgLx2R6iVUk24Ug8lNeSYs6XYXQNk291xqCLrAdcysnpAveqb7Ih2cqubgd1yqccRvz_XlwU53CBoWDN56RhLVtjoz_-INUQUVGVOAUPv92_ppDqeIhiBOBNBV0FN6uVB3TdIoVUzgM1RRN3bgdtGzCnzc6kfiJoBX5APtEYGTmDKMXCicNsyByXddjrrc_jK_V9sEwjVkuJpVtWIU5G-TnXrxXqEaK7ctu2IQlw5kx_xXll_Jj5hwzYeVaA_VWs-MxD59B_J7ZeJEqN4ai0bVqwgVNSCRT4eJfnTa5hHook-SijXaT2kNRIhp9_9sx5xWz8sx2mizVEa9TwvWwwmv8Z0HPtbS6r4FFT_EUxlfbuGfl0Esribcqb-WZmP9WDM5S-7ZxXjiDOdA8eWoVbgivb1v5p-Yt-wVfFm00)](https://editor.plantuml.com/uml/XLRDRXit4BxlKqpbGoNLSlNdfZ5i8vOi9G7iE92iNA8W62qfYGv5RhXSftLH8ASyG1-Xjvxx27cJF4c7vEvg_LC75cmjvnlEp3VVpFfPQj7OR2EZ7nXV2iNXxENp5vU3iza8TaQzSNTyMbh2ORVpz9TnBqe_29MWmGqa67_05P_QtoK7msEBQYLv1P2bFCQKmnyHm830AwCpnOPQQhEDvcpQC6x2UNvqOep-L3dvCuf-XB4sDsY02GeMYw__Ah0wQLdTMcXhjKl886pu5Jbfiq8bRZ30hhcn8aOP4Pvy8CVxYwpGAegii5J4SDPgjpi7CE4eXGlrsdpzXuZQQ60Spj5o8r3ELVqDDwc_-Tn5GuRGWejR8IyIApRqnB3XKZywEeAJs6h3KwXBP1h4pSTCSCDqmnaZT4Qe3SH22cs9DoDq3J250UoCnwFshzq2CaipPwICvceBzzYPmmw7Ws4HSYfIopVe8vGTWbfn7DmlURokaUU--_7Dea_m7sBgIy_eJsA4YaM24kenLzReLfebH8WseG8e-rrhDWEJpUPStUTohYfa-ho7CmB3pc1mEXeFgl6dsO9kr2beIdI5LB-WXpeb8ZF66yJwgKWJdOhRVRwRpnjAWL4A8uhFGloSnMtuzvs7FFprIYo4UsJ_a_dxRjLrmbT4hxbTSVtIe4enb-t9yELfe-BVg_e_vuexxw7U94OlK5dkuvQtLHpx3v05Eeb9qwvF_3VB5NCqJRaR3f8TWaJgA8bXZNTf6gbhGO5VQIkMHAFFTQuIxN8nXbS3xpkbZPyEomHkgv-dj1o88rYwaML8a9naQBrT2yQuUiVq9zMg49X_UnZGAm6zXm7zi28S3nCkqJ50enPh1PYFdIjs02qZLclREiurTm12aNWmci6Uj-oL1bowWI7AY807hZuyp5LuV0prhJmnzQhaANKiZ0ci7HM02xpIFeaGO6_lkEJae7hRFNltE_RUT-pzE_PRjRXk7Hu6eVXASl5igwYAfMX-URc_kl2UgxUn5mgLx2R6iVUk24Ug8lNeSYs6XYXQNk291xqCLrAdcysnpAveqb7Ih2cqubgd1yqccRvz_XlwU53CBoWDN56RhLVtjoz_-INUQUVGVOAUPv92_ppDqeIhiBOBNBV0FN6uVB3TdIoVUzgM1RRN3bgdtGzCnzc6kfiJoBX5APtEYGTmDKMXCicNsyByXddjrrc_jK_V9sEwjVkuJpVtWIU5G-TnXrxXqEaK7ctu2IQlw5kx_xXll_Jj5hwzYeVaA_VWs-MxD59B_J7ZeJEqN4ai0bVqwgVNSCRT4eJfnTa5hHook-SijXaT2kNRIhp9_9sx5xWz8sx2mizVEa9TwvWwwmv8Z0HPtbS6r4FFT_EUxlfbuGfl0Esribcqb-WZmP9WDM5S-7ZxXjiDOdA8eWoVbgivb1v5p-Yt-wVfFm00)[Complete con los casos de uso principales de su sistema. No necesita documentar TODOS los casos de uso con el mismo nivel de detalle. Enfóquese en los más críticos o complejos.]
+[![](https://img.plantuml.biz/plantuml/svg/XLRDRXit4BxlKqpbGoNLSlNdfZ5i8vOi9G7iE92iNA8W62qfYGv5RhXSftLH8ASyG1-Xjvxx27cJF4c7vEvg_LC75cmjvnlEp3VVpFfPQj7OR2EZ7nXV2iNXxENp5vU3iza8TaQzSNTyMbh2ORVpz9TnBqe_29MWmGqa67_05P_QtoK7msEBQYLv1P2bFCQKmnyHm830AwCpnOPQQhEDvcpQC6x2UNvqOep-L3dvCuf-XB4sDsY02GeMYw__Ah0wQLdTMcXhjKl886pu5Jbfiq8bRZ30hhcn8aOP4Pvy8CVxYwpGAegii5J4SDPgjpi7CE4eXGlrsdpzXuZQQ60Spj5o8r3ELVqDDwc_-Tn5GuRGWejR8IyIApRqnB3XKZywEeAJs6h3KwXBP1h4pSTCSCDqmnaZT4Qe3SH22cs9DoDq3J250UoCnwFshzq2CaipPwICvceBzzYPmmw7Ws4HSYfIopVe8vGTWbfn7DmlURokaUU--_7Dea_m7sBgIy_eJsA4YaM24kenLzReLfebH8WseG8e-rrhDWEJpUPStUTohYfa-ho7CmB3pc1mEXeFgl6dsO9kr2beIdI5LB-WXpeb8ZF66yJwgKWJdOhRVRwRpnjAWL4A8uhFGloSnMtuzvs7FFprIYo4UsJ_a_dxRjLrmbT4hxbTSVtIe4enb-t9yELfe-BVg_e_vuexxw7U94OlK5dkuvQtLHpx3v05Eeb9qwvF_3VB5NCqJRaR3f8TWaJgA8bXZNTf6gbhGO5VQIkMHAFFTQuIxN8nXbS3xpkbZPyEomHkgv-dj1o88rYwaML8a9naQBrT2yQuUiVq9zMg49X_UnZGAm6zXm7zi28S3nCkqJ50enPh1PYFdIjs02qZLclREiurTm12aNWmci6Uj-oL1bowWI7AY807hZuyp5LuV0prhJmnzQhaANKiZ0ci7HM02xpIFeaGO6_lkEJae7hRFNltE_RUT-pzE_PRjRXk7Hu6eVXASl5igwYAfMX-URc_kl2UgxUn5mgLx2R6iVUk24Ug8lNeSYs6XYXQNk291xqCLrAdcysnpAveqb7Ih2cqubgd1yqccRvz_XlwU53CBoWDN56RhLVtjoz_-INUQUVGVOAUPv92_ppDqeIhiBOBNBV0FN6uVB3TdIoVUzgM1RRN3bgdtGzCnzc6kfiJoBX5APtEYGTmDKMXCicNsyByXddjrrc_jK_V9sEwjVkuJpVtWIU5G-TnXrxXqEaK7ctu2IQlw5kx_xXll_Jj5hwzYeVaA_VWs-MxD59B_J7ZeJEqN4ai0bVqwgVNSCRT4eJfnTa5hHook-SijXaT2kNRIhp9_9sx5xWz8sx2mizVEa9TwvWwwmv8Z0HPtbS6r4FFT_EUxlfbuGfl0Esribcqb-WZmP9WDM5S-7ZxXjiDOdA8eWoVbgivb1v5p-Yt-wVfFm00)](https://editor.plantuml.com/uml/XLRDRXit4BxlKqpbGoNLSlNdfZ5i8vOi9G7iE92iNA8W62qfYGv5RhXSftLH8ASyG1-Xjvxx27cJF4c7vEvg_LC75cmjvnlEp3VVpFfPQj7OR2EZ7nXV2iNXxENp5vU3iza8TaQzSNTyMbh2ORVpz9TnBqe_29MWmGqa67_05P_QtoK7msEBQYLv1P2bFCQKmnyHm830AwCpnOPQQhEDvcpQC6x2UNvqOep-L3dvCuf-XB4sDsY02GeMYw__Ah0wQLdTMcXhjKl886pu5Jbfiq8bRZ30hhcn8aOP4Pvy8CVxYwpGAegii5J4SDPgjpi7CE4eXGlrsdpzXuZQQ60Spj5o8r3ELVqDDwc_-Tn5GuRGWejR8IyIApRqnB3XKZywEeAJs6h3KwXBP1h4pSTCSCDqmnaZT4Qe3SH22cs9DoDq3J250UoCnwFshzq2CaipPwICvceBzzYPmmw7Ws4HSYfIopVe8vGTWbfn7DmlURokaUU--_7Dea_m7sBgIy_eJsA4YaM24kenLzReLfebH8WseG8e-rrhDWEJpUPStUTohYfa-ho7CmB3pc1mEXeFgl6dsO9kr2beIdI5LB-WXpeb8ZF66yJwgKWJdOhRVRwRpnjAWL4A8uhFGloSnMtuzvs7FFprIYo4UsJ_a_dxRjLrmbT4hxbTSVtIe4enb-t9yELfe-BVg_e_vuexxw7U94OlK5dkuvQtLHpx3v05Eeb9qwvF_3VB5NCqJRaR3f8TWaJgA8bXZNTf6gbhGO5VQIkMHAFFTQuIxN8nXbS3xpkbZPyEomHkgv-dj1o88rYwaML8a9naQBrT2yQuUiVq9zMg49X_UnZGAm6zXm7zi28S3nCkqJ50enPh1PYFdIjs02qZLclREiurTm12aNWmci6Uj-oL1bowWI7AY807hZuyp5LuV0prhJmnzQhaANKiZ0ci7HM02xpIFeaGO6_lkEJae7hRFNltE_RUT-pzE_PRjRXk7Hu6eVXASl5igwYAfMX-URc_kl2UgxUn5mgLx2R6iVUk24Ug8lNeSYs6XYXQNk291xqCLrAdcysnpAveqb7Ih2cqubgd1yqccRvz_XlwU53CBoWDN56RhLVtjoz_-INUQUVGVOAUPv92_ppDqeIhiBOBNBV0FN6uVB3TdIoVUzgM1RRN3bgdtGzCnzc6kfiJoBX5APtEYGTmDKMXCicNsyByXddjrrc_jK_V9sEwjVkuJpVtWIU5G-TnXrxXqEaK7ctu2IQlw5kx_xXll_Jj5hwzYeVaA_VWs-MxD59B_J7ZeJEqN4ai0bVqwgVNSCRT4eJfnTa5hHook-SijXaT2kNRIhp9_9sx5xWz8sx2mizVEa9TwvWwwmv8Z0HPtbS6r4FFT_EUxlfbuGfl0Esribcqb-WZmP9WDM5S-7ZxXjiDOdA8eWoVbgivb1v5p-Yt-wVfFm00)
 
-**Lista de Casos de Uso del Sistema:**
+[Complete con los casos de uso principales de su sistema. No necesita documentar TODOS los casos de uso con el mismo nivel de detalle. Enfóquese en los más críticos o complejos.]
 
-- **CU-001**: Realizar Préstamo de Material (documentado arriba)
-- **CU-002**: Realizar Devolución de Material
-- **CU-003**: Registrar Nuevo Usuario
-- **CU-004**: Buscar Material en Catálogo
-- **CU-005**: Crear Reserva de Material
-- **CU-006**: Renovar Préstamo
-- **CU-007**: Procesar Pago de Multa
-- **CU-008**: Generar Reporte de Materiales Más Prestados
-- **CU-009**: Configurar Parámetros del Sistema
-- **CU-010**: Realizar Respaldo de Datos
-- ... [continuar según necesidad]
 
-<br>
+
+
+
 
 ### 4.2 Glosario
 
@@ -2755,7 +2962,6 @@ Ver Sección 1.4 para el glosario completo de términos, acrónimos y abreviatur
 | **Morosidad** | Estado de un usuario que no ha devuelto materiales en la fecha establecida. |
 | **Obra** | Contenido intelectual (ej: "Don Quijote de la Mancha"). Una obra puede tener múltiples ediciones y ejemplares. |
 | **Política de préstamo** | Reglas que definen cuántos materiales puede prestar cada tipo de usuario, por cuántos días, y si puede renovar. |
-
 <br>
 
 ### 4.3 Diagramas del sistema
@@ -2778,11 +2984,22 @@ TIPOS DE DIAGRAMAS ÚTILES:
 
 [Incluya diagrama mostrando el sistema y sus interacciones con actores externos y sistemas externos]
 
+[![](https://img.plantuml.biz/plantuml/svg/VLRBRkCs5DthAswpwKm0mzEi2cCQZ2ofYG2_8Cf1fx4NZCGuH2JI9Qcaaw8VCyjPp6e-mJ_MIxqiMtQz2KBUnpdd7bxxapPKcIBF8972iB-D73pmXunBmv8dvwUKFNB180gys9tTJ098Cggru-XdBhPKqHmKImmLcup1FmxWPqoJvusIXKWzcKdryQFcsh2SNb_3X6-Up3WhsEb0cXYfch0RnPWu7OSWcHAoYVpCiao-Lg5IfKoLOJ3ECAyy_Hs94Vx6u9ShvzykTAgKVArXLqa-LSyjm7tU1vjdk46IFgSRpAMGCiof58C1a8eaZ4ljOgkTypFyPZ_WUl4y2WZSBgVkR4xWNVZsLy6PIkdxAi8fcSF5KXTKSJdqCiwmyagCcqdG2w0QYkeUMgcQn7qSNfUX3zsJVeARvbmWP4LJgLQYHbzcKdlLoMXfa934mTG5BvZ5aJkfeU_7Vt5vsLVXyd8btZN7ADaDquRlVWZeGgRloywrKQ1ZcLvt0i4VSH2LCleCcpzH8CMM8KlrlW-fwJmj14_ubcOhWI325ENbZpoXYSLY4Kx36aFEeUEmWrfClN2K2yWqNgo49vLY4e8C8nHMuOciAvZjsHAj42iHCOruKecL48sY6N_3OLJ3G-SMXqLQ7VoGBEOaZCExhWIXU3mdmOIL8_TsFrA-aIN_CHgVQgJz9tjG57noTVNXruf_LaMVmH_cMyMqL7GbujqtbVFQcBmvFurvudwUBsEeSCzduUocXjaOUd3_n5CSoZgLhs9mQ5xdqCf7eQLRyKtZs8vkx1oSSXZ7rKjrdLhaeykAlrFBS7JPqjnJYuA9wo6dW8nWIPPk5Cw7tYJ49n8SSrHsMGskMvkFxFxGHMOe9DJilcRIZYTYec0l5BPgzmrNSovnJhSqORXdDHgGQgV97sJiqTPh6enW9XjNIy4qO117mwCtfCehgqDESJgSPaoVvZ0EnvDm7WUUPL8pE1f0dqV4DkKkEG1TldGfQ8CFZnPA9anR-x_8hAXGzkWSTXl10Nmcm72MRoNAOH-pcp5bq81VG1nmFqtEzQVX3FT8vFhpg5czvRexFPn7lYcGLNrcAGc6_oksbSgmBaTLF-O-dQg-rQXA0aoXwUux9YPMaudSQBiOQP5ojDpk-nbpDTjtkfo5NhXezs_RhsM0Js44TxXFKWgyt7GfJLSYuGN-fS8slR-DumKPufTI3EuYN5VlfqQyby2dHcgGA6lfc6wDCo23w2wqsjeLUHuWliaH1E85oHxD3Q7Pr64y8UlwyVPGbOFfE0BBoF_Np0_mcA1c_lmSg7eRs3dLayI969dlljPpkbVwYqY6XDokszNHWqOCDONkkE4ah8CLNk5fzasVRBMshKCUwgrzloHZk0tzTP_5VWzRcN8gB8_giFgYkm-8DyJcQmS_dvX8yOVVVm00)](https://editor.plantuml.com/uml/VLRBRkCs5DthAswpwKm0mzEi2cCQZ2ofYG2_8Cf1fx4NZCGuH2JI9Qcaaw8VCyjPp6e-mJ_MIxqiMtQz2KBUnpdd7bxxapPKcIBF8972iB-D73pmXunBmv8dvwUKFNB180gys9tTJ098Cggru-XdBhPKqHmKImmLcup1FmxWPqoJvusIXKWzcKdryQFcsh2SNb_3X6-Up3WhsEb0cXYfch0RnPWu7OSWcHAoYVpCiao-Lg5IfKoLOJ3ECAyy_Hs94Vx6u9ShvzykTAgKVArXLqa-LSyjm7tU1vjdk46IFgSRpAMGCiof58C1a8eaZ4ljOgkTypFyPZ_WUl4y2WZSBgVkR4xWNVZsLy6PIkdxAi8fcSF5KXTKSJdqCiwmyagCcqdG2w0QYkeUMgcQn7qSNfUX3zsJVeARvbmWP4LJgLQYHbzcKdlLoMXfa934mTG5BvZ5aJkfeU_7Vt5vsLVXyd8btZN7ADaDquRlVWZeGgRloywrKQ1ZcLvt0i4VSH2LCleCcpzH8CMM8KlrlW-fwJmj14_ubcOhWI325ENbZpoXYSLY4Kx36aFEeUEmWrfClN2K2yWqNgo49vLY4e8C8nHMuOciAvZjsHAj42iHCOruKecL48sY6N_3OLJ3G-SMXqLQ7VoGBEOaZCExhWIXU3mdmOIL8_TsFrA-aIN_CHgVQgJz9tjG57noTVNXruf_LaMVmH_cMyMqL7GbujqtbVFQcBmvFurvudwUBsEeSCzduUocXjaOUd3_n5CSoZgLhs9mQ5xdqCf7eQLRyKtZs8vkx1oSSXZ7rKjrdLhaeykAlrFBS7JPqjnJYuA9wo6dW8nWIPPk5Cw7tYJ49n8SSrHsMGskMvkFxFxGHMOe9DJilcRIZYTYec0l5BPgzmrNSovnJhSqORXdDHgGQgV97sJiqTPh6enW9XjNIy4qO117mwCtfCehgqDESJgSPaoVvZ0EnvDm7WUUPL8pE1f0dqV4DkKkEG1TldGfQ8CFZnPA9anR-x_8hAXGzkWSTXl10Nmcm72MRoNAOH-pcp5bq81VG1nmFqtEzQVX3FT8vFhpg5czvRexFPn7lYcGLNrcAGc6_oksbSgmBaTLF-O-dQg-rQXA0aoXwUux9YPMaudSQBiOQP5ojDpk-nbpDTjtkfo5NhXezs_RhsM0Js44TxXFKWgyt7GfJLSYuGN-fS8slR-DumKPufTI3EuYN5VlfqQyby2dHcgGA6lfc6wDCo23w2wqsjeLUHuWliaH1E85oHxD3Q7Pr64y8UlwyVPGbOFfE0BBoF_Np0_mcA1c_lmSg7eRs3dLayI969dlljPpkbVwYqY6XDokszNHWqOCDONkkE4ah8CLNk5fzasVRBMshKCUwgrzloHZk0tzTP_5VWzRcN8gB8_giFgYkm-8DyJcQmS_dvX8yOVVVm00)
+
 **4.3.2 Diagrama de Arquitectura de Alto Nivel**
 
 [Incluya diagrama mostrando capas principales: Presentación, Lógica de Negocio, Acceso a Datos, Integraciones]
+[![](https://img.plantuml.biz/plantuml/svg/XLVDSjis4BxpARQ-r7RYPZAPNZoTJ6LQSTMnVYegwNJg7Y0Iek6000k0IfnEhts0vWbop26dt7hLc_H9kWl-YtBZWqVS_G0illsm2tnl7JEko2GmytiX78zTOTXPp79cWwyIlX6AGpYVBkQpyMm51lrCfP87WNqjLCuCoo3MMQuLLmx-203_BbZyEZMwK4cefJRVVPSRRj7DOg7Ly-TmBT9RTo4BVXYjUAeHMGEl3EVgC39XJjiQzmkNKhyv31JAyTJqrby8zVems1ccx9ORosGR0xilmTeat7WWN4WSwQqlj7AHUCVXwTFWpoup621RCyiF4mC_ttBc7fWNvt72IGwNWc7e6OE4mwYJ8_yjdOQPs789Pn09wpZYBiHQ2htYyUsDEjuVyGn2IYqyWeYRhK16x4aGvBWYIpaSXQF522x7i5YE8yptA9piti-EO932SZ-_Jf1Nis7lu6U-lb5BRb47LcpPRu1BlE7h4ZLQJ03dMs4uBmeAvCJxMIwyt_zJsd4mn3NeJJCKuFGKDwAGbtJtYPsVdbRcC_XXDRt-zZ64KVJiCVp8jYoAZSXTux_GsbbCPVvaoZ18mIHSSYjIrI12b2rpI1O_X_3Mw8m_XXV2y8r--xW20OoJ5CqHsp1JHijLueEb10rekzwzlvg4_kTiV3KF9tFYhXLqHTjqzpaffCPytAXHuP1N4IEpky_gHjrZOjB2Y8Gb9Kk5knsEkkBM4Tv_lBG5HgUjnnVLnnV6XCpjFY2hsW-AKQVqCHoqCBkFM28oRU7-HbtohPO5QO2Ngv4il7Su4jM02cCbpbGVGzYqa0u1zx1WQRM5p9k6q9bsOkEPQjPNP3gqTgwDu_NQvST3OciO9hLL6cPh8Ia5t7OrzugHqISAOiCJhcBKLJLpAIdbZ9Pqq5WSSwlXU7an2ayQG2S7O56Ej95MibB_Nd0D62vGnL9OtM3392vQ4Vo_uXk5uJYQ0_uUhUOH2Q-kZvNiY1Khd4Pvx8c6AEeBfuUjJr27qAmn7S2tecdmUqBfmVUKWjllgQKVYjT66qP7AZtSg4Ze9nQD1il8z9081WoG61RC6KfMC_DzLmsZDTMN9jDOU2yRtoJB9S-eO4AuVDdQfqpnEmQ-nU2uVlvVMWRpvHIETKuU9ay6IMyQoj45_KSLNLAEaN9jNMfuzDCrLjdjqsUFJevet-i4atz8BD5u-Mg2zIcYZybiDRvQjiM-touhzOHIu7wmvomcDwhkDTD2OG_9cVGisqp49Qe_99gk5ZTgd35HurpU0zQzg2uSE65ILgOr1bxajl8_bBszXIbt8JRW63Mw-sIfklREiSy2BGPEP5mNhit1aZSd3-k2pdOVSBHk_I_mE59CcEvC9neofWecsm8WJ8pz5jQ6izVS03OOZ44DyXXBNIHmLD5eOVoMODeUrMmF2BvH6EuaeLwngRj5JNg7n0HhHqdtHE76NL4ggQ5z3_eGtsRRKqshbjLoD8jUZPVHw7hiQqp_jbH5VwtJLAYKMiRUGPIbfuJrEv9M6u6ThrlUOs-hnCJYszt7gbt5jvLowfBS3Dbs30_9fHi4QMMKIwGKK-fqGZ7w9VA-PfOynPGOhngTSyFs3c-bgHWJP324TopnK6uCbRCMjlle3EcHd0Ob8JBIhHuev6jSKLQB04tAovZWU2CBBrwBQv4U-4c0zoKuEtlkMncSGwHnFvXxnE0zQRLe_4s5gmrDuwyDRPskBKqnhWrLpMtzLNiD_EgrgLcg_l45J-S8rq4r8phDfeclSROH3tt_Ex29e-yghnJrhjijrZGCF9r5IcfQJydKdhKDkAPk6DB0qrbau6id3BgJUFyw2Vh3kzR-nYjZRt_ry7O7bSKtqzeGjCchSuag9EL5J-ZY7tGAVWLmEUaK2zMJrNKKzAjyEMrTY11dxBsAdqJH3q7WizFCKIkcVrhgUInqYXCILnrx-2RHRzGtpMb1yz3NaFY0lwNk0K27aWeHbDNiC29kgnyMn26qvUzBM6pvvzXtpEv3nh5U-IBAttfau0jdWspEsRclgBkF1BMbPll83XiLqbyjWw1RRG-XUzNu8BWJn9V1NTPxw43obAgdB_61lxij9xDmig2UDLh-z7Ao6eShlDvCmddagxe7HPpUwUM5dgloQLmMVMpbB66-vE8bWIigrhsN0Up-mSxCFFIIvxuKusi07s1A9FYAZCl6Yy4VCsF4ci6_V_qDU7cxqoVL_3YrBR2L26p4ipcHhsCEehawnlLBmKSXrCP3wzXV4UIkZVVq55iGNbr45I3QSOriJOcGEgvwalMl2vgm6hGYHZj35gRWwt8R3hF81WF65kTYlKMeBUK5lOU0Uo-zNn9FYjTiLjtCplm3gx3TqTMpZQxeXHCKvBfyLFXDufDzkxTFlEdIcnqqdkjRZedeDr8upeGJARLV9BIIQydubDtJLZGHVETpAEXonIGStnMsl5TXpcc_MO_Aam3dBnKM1D_Z_oAJ_m40)](https://editor.plantuml.com/uml/XLVDSjis4BxpARQ-r7RYPZAPNZoTJ6LQSTMnVYegwNJg7Y0Iek6000k0IfnEhts0vWbop26dt7hLc_H9kWl-YtBZWqVS_G0illsm2tnl7JEko2GmytiX78zTOTXPp79cWwyIlX6AGpYVBkQpyMm51lrCfP87WNqjLCuCoo3MMQuLLmx-203_BbZyEZMwK4cefJRVVPSRRj7DOg7Ly-TmBT9RTo4BVXYjUAeHMGEl3EVgC39XJjiQzmkNKhyv31JAyTJqrby8zVems1ccx9ORosGR0xilmTeat7WWN4WSwQqlj7AHUCVXwTFWpoup621RCyiF4mC_ttBc7fWNvt72IGwNWc7e6OE4mwYJ8_yjdOQPs789Pn09wpZYBiHQ2htYyUsDEjuVyGn2IYqyWeYRhK16x4aGvBWYIpaSXQF522x7i5YE8yptA9piti-EO932SZ-_Jf1Nis7lu6U-lb5BRb47LcpPRu1BlE7h4ZLQJ03dMs4uBmeAvCJxMIwyt_zJsd4mn3NeJJCKuFGKDwAGbtJtYPsVdbRcC_XXDRt-zZ64KVJiCVp8jYoAZSXTux_GsbbCPVvaoZ18mIHSSYjIrI12b2rpI1O_X_3Mw8m_XXV2y8r--xW20OoJ5CqHsp1JHijLueEb10rekzwzlvg4_kTiV3KF9tFYhXLqHTjqzpaffCPytAXHuP1N4IEpky_gHjrZOjB2Y8Gb9Kk5knsEkkBM4Tv_lBG5HgUjnnVLnnV6XCpjFY2hsW-AKQVqCHoqCBkFM28oRU7-HbtohPO5QO2Ngv4il7Su4jM02cCbpbGVGzYqa0u1zx1WQRM5p9k6q9bsOkEPQjPNP3gqTgwDu_NQvST3OciO9hLL6cPh8Ia5t7OrzugHqISAOiCJhcBKLJLpAIdbZ9Pqq5WSSwlXU7an2ayQG2S7O56Ej95MibB_Nd0D62vGnL9OtM3392vQ4Vo_uXk5uJYQ0_uUhUOH2Q-kZvNiY1Khd4Pvx8c6AEeBfuUjJr27qAmn7S2tecdmUqBfmVUKWjllgQKVYjT66qP7AZtSg4Ze9nQD1il8z9081WoG61RC6KfMC_DzLmsZDTMN9jDOU2yRtoJB9S-eO4AuVDdQfqpnEmQ-nU2uVlvVMWRpvHIETKuU9ay6IMyQoj45_KSLNLAEaN9jNMfuzDCrLjdjqsUFJevet-i4atz8BD5u-Mg2zIcYZybiDRvQjiM-touhzOHIu7wmvomcDwhkDTD2OG_9cVGisqp49Qe_99gk5ZTgd35HurpU0zQzg2uSE65ILgOr1bxajl8_bBszXIbt8JRW63Mw-sIfklREiSy2BGPEP5mNhit1aZSd3-k2pdOVSBHk_I_mE59CcEvC9neofWecsm8WJ8pz5jQ6izVS03OOZ44DyXXBNIHmLD5eOVoMODeUrMmF2BvH6EuaeLwngRj5JNg7n0HhHqdtHE76NL4ggQ5z3_eGtsRRKqshbjLoD8jUZPVHw7hiQqp_jbH5VwtJLAYKMiRUGPIbfuJrEv9M6u6ThrlUOs-hnCJYszt7gbt5jvLowfBS3Dbs30_9fHi4QMMKIwGKK-fqGZ7w9VA-PfOynPGOhngTSyFs3c-bgHWJP324TopnK6uCbRCMjlle3EcHd0Ob8JBIhHuev6jSKLQB04tAovZWU2CBBrwBQv4U-4c0zoKuEtlkMncSGwHnFvXxnE0zQRLe_4s5gmrDuwyDRPskBKqnhWrLpMtzLNiD_EgrgLcg_l45J-S8rq4r8phDfeclSROH3tt_Ex29e-yghnJrhjijrZGCF9r5IcfQJydKdhKDkAPk6DB0qrbau6id3BgJUFyw2Vh3kzR-nYjZRt_ry7O7bSKtqzeGjCchSuag9EL5J-ZY7tGAVWLmEUaK2zMJrNKKzAjyEMrTY11dxBsAdqJH3q7WizFCKIkcVrhgUInqYXCILnrx-2RHRzGtpMb1yz3NaFY0lwNk0K27aWeHbDNiC29kgnyMn26qvUzBM6pvvzXtpEv3nh5U-IBAttfau0jdWspEsRclgBkF1BMbPll83XiLqbyjWw1RRG-XUzNu8BWJn9V1NTPxw43obAgdB_61lxij9xDmig2UDLh-z7Ao6eShlDvCmddagxe7HPpUwUM5dgloQLmMVMpbB66-vE8bWIigrhsN0Up-mSxCFFIIvxuKusi07s1A9FYAZCl6Yy4VCsF4ci6_V_qDU7cxqoVL_3YrBR2L26p4ipcHhsCEehawnlLBmKSXrCP3wzXV4UIkZVVq55iGNbr45I3QSOriJOcGEgvwalMl2vgm6hGYHZj35gRWwt8R3hF81WF65kTYlKMeBUK5lOU0Uo-zNn9FYjTiLjtCplm3gx3TqTMpZQxeXHCKvBfyLFXDufDzkxTFlEdIcnqqdkjRZedeDr8upeGJARLV9BIIQydubDtJLZGHVETpAEXonIGStnMsl5TXpcc_MO_Aam3dBnKM1D_Z_oAJ_m40)
 
-**4.3.3 Modelo Entidad-Relación de la Base de Datos**
+**4.3.3 Diagrama de Componentes del Sistema**
+
+**[Incluya diagrama mostrando los principales componentes/módulos del sistema y sus interacciones]
+
+**Módulo de prestamos**
+
+[![](https://img.plantuml.biz/plantuml/svg/ZLMxRjim5Dtr5RUURC11ban5KIIMtGQ5dRgnaux1DNNZig18bQGC64K_fcE6JDcwwiTAwcN9bjfuiKoUS-xHVVdIMDGsZGKm5ITAahHapZPy8xYonBu5RxXa8eq8teKNv-75GrZ1tWU1vLOGJ3bkDSO83XGUHE0C5jbBb0hbBvOwUtAXOcM285JI8fUa7oOgbH7g_H2JP0o3gqHmXendBn8ckOMrip0OmSy0tASM7oQQSZ6lf9KGf1sx_86Hqks80tUvIZINMrZSXt0W-Oi5IlgEeEb7wZGDNA_NIqXG8oIr0EoTu4w9b74Ntmn6FNPMf7USaG-NFt7LOQJ0m1ptXO5vzh9rR-sHahRAaTx23WMFi8Ws1fRz5ipbqJrgsWeq7bkxEt5Ja5qM3dRkgwD-FpL_KEF1lrMa83KfQgx6477ZC7p3SpM8qPBcACOWikUOsuxCCFJEVMGyk0aFXzxF1rTZxFTIek4nXtb2LGlV9eQssHy9YN8Mh4lZgGMfB7zqDws4DEjpKmBAulRvcCbTzemWM-X_LwBgYrjANFO6_ijmgtHNNtnQNa4DsFkJAyR8A70vGglQaKxVignHTwIxulBLST8AVnobgdXtc4LvIwyE51yOe-1NOpDCDyDeuoWJDBxUCFKChx5KncurhRxCSqKH8oFPdDLnxNxSbg-rXoQsILLbFnEhnNgPLpX6Bi0V5vFPNV74CPZIcdozWriIdTleT2NCXT-Hw8NZxCcgg4X1EVDEgobLqpg6-Sxa8lcEAgvr7xjp_9hy4g3BwUhJwPoXfau5w7LoD0fBqeORIowJicoMaddwmktMTaasgR1vwFP-wXKuwjgcGdkZ7Paly7aVpedEPuPflg7SxdGIbk2MkmfxX6aR-8zWLwxBZYqRadoV5elATUxvUhxodRYw_lprOJxxEBkP3aV19Sd8_Ql_1G00)](https://editor.plantuml.com/uml/ZLMxRjim5Dtr5RUURC11ban5KIIMtGQ5dRgnaux1DNNZig18bQGC64K_fcE6JDcwwiTAwcN9bjfuiKoUS-xHVVdIMDGsZGKm5ITAahHapZPy8xYonBu5RxXa8eq8teKNv-75GrZ1tWU1vLOGJ3bkDSO83XGUHE0C5jbBb0hbBvOwUtAXOcM285JI8fUa7oOgbH7g_H2JP0o3gqHmXendBn8ckOMrip0OmSy0tASM7oQQSZ6lf9KGf1sx_86Hqks80tUvIZINMrZSXt0W-Oi5IlgEeEb7wZGDNA_NIqXG8oIr0EoTu4w9b74Ntmn6FNPMf7USaG-NFt7LOQJ0m1ptXO5vzh9rR-sHahRAaTx23WMFi8Ws1fRz5ipbqJrgsWeq7bkxEt5Ja5qM3dRkgwD-FpL_KEF1lrMa83KfQgx6477ZC7p3SpM8qPBcACOWikUOsuxCCFJEVMGyk0aFXzxF1rTZxFTIek4nXtb2LGlV9eQssHy9YN8Mh4lZgGMfB7zqDws4DEjpKmBAulRvcCbTzemWM-X_LwBgYrjANFO6_ijmgtHNNtnQNa4DsFkJAyR8A70vGglQaKxVignHTwIxulBLST8AVnobgdXtc4LvIwyE51yOe-1NOpDCDyDeuoWJDBxUCFKChx5KncurhRxCSqKH8oFPdDLnxNxSbg-rXoQsILLbFnEhnNgPLpX6Bi0V5vFPNV74CPZIcdozWriIdTleT2NCXT-Hw8NZxCcgg4X1EVDEgobLqpg6-Sxa8lcEAgvr7xjp_9hy4g3BwUhJwPoXfau5w7LoD0fBqeORIowJicoMaddwmktMTaasgR1vwFP-wXKuwjgcGdkZ7Paly7aVpedEPuPflg7SxdGIbk2MkmfxX6aR-8zWLwxBZYqRadoV5elATUxvUhxodRYw_lprOJxxEBkP3aV19Sd8_Ql_1G00)
+
+**4.3.4 Modelo Entidad-Relación de la Base de Datos**
 
 [Incluya diagrama ER mostrando entidades principales y sus relaciones]
 
@@ -2794,7 +3011,9 @@ Ejemplo de entidades principales:
 - Multa (id, prestamo_id, monto, fecha_generacion, fecha_pago, estado)
 - Reserva (id, usuario_id, material_id, fecha_reserva, estado)
 
-**4.3.4 Mockups de Interfaces Principales**
+[![](https://img.plantuml.biz/plantuml/svg/jLbDRzl86RxhLmoCNTWMRCDEugOGDa5eYKgOIAIMaepTee0m8iVA92I76PBEUZUzzjP3sr-mnnvoAFQsL_sJ_fA-yyKlKNRQRGF446VUuRmVp_l95rcEULx44OfPI29sIlZfcguZod8IlEtr3j6G9JTqKt0SqEql2Ge98bbE8vRrilSqIJ77CGeYd6Nefnw2VrSuUB_Xh4Z28OiOHnEwUPj_JwA8VLJxZ8U4gxsh28ZbgiKv-wWMHvY_lueAqljJhvVJF29eAbb3TfBJ48UdFeaqCwTeJhESn1XTIPuNmFCVawCHnHjW2mlU0vBc1OwEXIYskt16rcY0blEbvJlUwigvcZZUmXvQw2Y8A4boaWa98unA9U3Z7gpJ_0uTzFkx1_lz0uGpL6G5vfHf7VHHlq_3bLxizz40EUx2Vcdxw9jlPc-UFvTKfwUQEC0y8JaGNLl-y9Nb7pqwFmR2fUjykxGrSH_bD6Mha0L53FmmeBRTvVJeS6YFbXFhyEHmPisjcUSlxCDZVI81KjuyS-yD2OlN73HGaLsSdvkNuHHiI4EsP_i6L8zN2HWcflgkaRMmzMv8EGa2of862-NXd4JaXYNieicXt3LxZphs-WXiJwCMHtjKPqna56U1tXOUACwUBvOZnm83mOFZZk6NCpbi2iR91f36MsAfFV93IeLxi6GL4wb1Yfjqu34uhDqyN3ZNukRvSZwptP4pykJDUbtT71THZhDLIf9G0nDUQG-TgJK1AKyUAIgspWY_bPTBYeNztQB170u4_EcFM6j_uKn1Nciw4-xLuH9pPxwmf-0FAU4PIt24FXG4u8qHYL2clAtB8_IvfZje-awlMEdD1xsZ00aJ79EQbI-xZ9n23Fe8mMNr5cTlws2vl3Isv2ogcN_gkC2qRuqy7zHVkJI80y-MbCYjkzDlS8ylm-a-dBIWGG4Eu6BPwWQNTneDZkon1RX6vv9o7J4m7xnJA2N73VlNKH9miWiGGQ2s0OeqPe2bW6HiXuQcEmH6p2UW-YREfk0LlcDDQX0oInexCSu9fm2y1chCwWDmeTcw7cCkddP6Wxo8wbm-hfcno1bVfPmc0Krnr1Mk90d9LXa98Cb9c3UWMKKr4NLAQOnH9ywLBspgszS0C16uHzSZ-3iKVxo5RunCGWhtKDn6ZU9X-q-sIWj8KO6nczQ9ETiAjfVw80qfYt77HW1yRiHzgv1y97UTmRQawM8f95d0QMfGPE9GiTOihcve1Z_tk8S4_cf34i9hkXevyvddWcEAoEnwgzgp5YV6S6QLCWxd0QSywZQ5WZ5DDc2uClAO6Dq4gFtQdiucbWyL0KifuF5c-ramBWk38YdXMG-2ven6C7b7uZJ2l8bWixeFmVS3VRnRDR2GRjXgZJd7sVt1KHS29LzDjEp4dORQPxvmTPcXR7VbspFBjuQEvuejszUvwyfwRRKo9Wu_5CBY2WzbCaoX483Wtzhz_-KrnVxKgrdBB6bh0KSWVjogtSpg0zRgBl76BQezfc-JjJ9ZMNJiEzPn92ItB2gQ8U4-z9J2rwDXHynKIgzHT-UHwleLoQ220AUi6t-72D9ErF6oVNbmP5ylRLMqNTlkK67Fe5278IgAfehFEj0Re6e8Oz3Lf6Weyxz68A3Dzg-j6W3rYiOVi27kRC9FB_vFqFV54SMKkegV1yqYIrTRbSskjt36pb35YQ47qT3MGMDekKDxeWF8TpD7r5lQLhfdO3czgV9OL_rHLTYxQ0eOk1RHZ3KFTmQHLZa2jLBTDFBP52AY0czL8MBf0QFiYHnxdFr1ewWgGh9Y5E_RKBNEA-pB8iBQ_jKhGt3CT0ks4rYDbLMgRQlqNXlFh9UMl6lekIFF5R_hTapnfj4UnIHdaDFridgTFRQDBoyi_xKjwnyGnfsFRLzuT9L5xec7NnmDzTqTn5y03GDfaUng2AalQw0q4Dp0Ittdj_bo0m-bFcKKd0e3oV2eyxOp4HB0WaIpx6ri5qWLKguc7aJs2YiuAzgpWR9kYacIuNUaA_obdCaXIxWRARJJ9hUqQ_TUZ06VZWBPs9e8CKmrBFed2CXPJfCwhsKDMVP4ujgwqPiD4U4Swdj3qs7rYVToPIr7piA3bgHcziQwjZike4Pl6ZnYcmSRMcYLP8H8ErGZlPtSjgOrjKfv5-KFUWC6UsY5Dyi-l7Saa-DrXCt1hdP1fYZbZVlU7s9X3fo8vCDKt_nw3gvKxIK59DZ6Ubyqaz1XG7HgTP7o58JvA6hvgm_9HVYYFU-P2S-dJwUdx2TKI_07EOLuTz2cg5BTWQX489Vla9Z8k-SDhUHr8AhRDP3rohvF4zPgR_KgfDgBWntA6bEah0v21kyitz4X8365hAGiToJbfqeA5VQ1eZMXwNYZjYz6HodV_aCk7n_yH-TC_RJz9TbxikJC77kG409FG3ACH73VHwmyioul68eWBcRHYDsO-HIWIbHZBoVM7E84SksN7a1fqE_3nYaQgh7izjU41WofDm7AHVyVRt_EmUfYgaeahItdEvhq3j9BH3TOzEzCRY_g0qY0CU4nJK045cq_vwQvBDKyqBwW9fG3f6OtbsNhIR8JT769mkrdd6dIQePfo1ytoSyRv6RAQOWVDOYVbhGWc8hLrQGIPLJF9j5pzDMZSqarLNDFE8LKhOOkv8n2J0NI0iI27n4o4GF2QYWyXxJDOc1qlrtsjne1Ze8Y4hyoiW5Zg5XMr_rTSofJ5n7CkQOOOQHRYov38o6zl1-fyXzqi9STINzdijqpfDeOUQLLAWEykUOcnlBTZHAyufNdMqVDgGaicxx8hEiuSLOHb1szl7vEuNguEsF0lqO6-jUV_wP1pikokDjCvltIJ6ewC3V6gMuQeBGW4jQ23PufHp7ZX06245yYNcYJtYfVQKmP1i00z7HPoXAwZWW29qyPnr7bURhzW_Vz01A9aeETQ3aKJYML650C8Es40f9eZT_X4_7cW781622HiYohyOvcFXSlGl7srmXm8rAFaPraKc1RFZA8D2D80DyMz1rewW0TNLHp8gbO8BsidGMHRWYNO_szMZRCz_iBP-RDqVTewa6TLsfQTm43zDNvsUKvn18k3IdaqyQjwGU47x8iPsetPMBqeZxdHQZX3BAFWChi5aU5q9PuRVKjJCKpfIljKG78hUD1MSZDLMWmdBgUrgPEiXpfp5_QF-jqn2hej9MqPZdufj2Ipe-IfV5a-TeJ0KCtsEh-YpDaU3MfjJGoS5Q12sWVdHacdbNImFhZC-6oqXzl2K0PrTHsOZwB8Eb-Chn3FLHUTbS9L7N9GFha3CtXHScjZ9eoVm17LMQwhFXM1SEJtxz5udkhC2-4ME5-lplJlWpFWoeUL0quq3oLD0dR9JFjkEBxgDJA1p0MhdkTl9L1vCwEQvQ8o4OyIC1A_KDVA6EdACQKxlk26QXqMJqZeYFG0tANaua8PAf25dGHlYLencaCCcEvCwxlZ1dV_fmGjMF6Kx1xZSLNOvrw8QX4M9Ml1gYkvqCBxFm1uidsxwx1v8A5WDW8_alYJ9nyF7RHqOBmGCGEk0vCweg_qR6Eci9Vn0SvaWHYCWnEbcGK0fVEbOA0ar1y5H04mjTaeMiusVu543K4x_1ji130gnuufP329PJy6JggyWyxhfFSQ4K02HTV1_K7rtUC9faYr20wKn-MJyhdzWTXIMpCVYQ-dSYLCdyqHinoosJeizRyiBbvNqeyLT52voQvK2-YzVh9JfTfb0WW4n_jeDEeLFVA7huPx4cQpv-rXfVt7YbBYNkFgV4Aa9pNLvKFJvmtDZhy-iNNXy9Lb8_qUY_WRn57_mO0)](https://editor.plantuml.com/uml/jLbDRzl86RxhLmoCNTWMRCDEugOGDa5eYKgOIAIMaepTee0m8iVA92I76PBEUZUzzjP3sr-mnnvoAFQsL_sJ_fA-yyKlKNRQRGF446VUuRmVp_l95rcEULx44OfPI29sIlZfcguZod8IlEtr3j6G9JTqKt0SqEql2Ge98bbE8vRrilSqIJ77CGeYd6Nefnw2VrSuUB_Xh4Z28OiOHnEwUPj_JwA8VLJxZ8U4gxsh28ZbgiKv-wWMHvY_lueAqljJhvVJF29eAbb3TfBJ48UdFeaqCwTeJhESn1XTIPuNmFCVawCHnHjW2mlU0vBc1OwEXIYskt16rcY0blEbvJlUwigvcZZUmXvQw2Y8A4boaWa98unA9U3Z7gpJ_0uTzFkx1_lz0uGpL6G5vfHf7VHHlq_3bLxizz40EUx2Vcdxw9jlPc-UFvTKfwUQEC0y8JaGNLl-y9Nb7pqwFmR2fUjykxGrSH_bD6Mha0L53FmmeBRTvVJeS6YFbXFhyEHmPisjcUSlxCDZVI81KjuyS-yD2OlN73HGaLsSdvkNuHHiI4EsP_i6L8zN2HWcflgkaRMmzMv8EGa2of862-NXd4JaXYNieicXt3LxZphs-WXiJwCMHtjKPqna56U1tXOUACwUBvOZnm83mOFZZk6NCpbi2iR91f36MsAfFV93IeLxi6GL4wb1Yfjqu34uhDqyN3ZNukRvSZwptP4pykJDUbtT71THZhDLIf9G0nDUQG-TgJK1AKyUAIgspWY_bPTBYeNztQB170u4_EcFM6j_uKn1Nciw4-xLuH9pPxwmf-0FAU4PIt24FXG4u8qHYL2clAtB8_IvfZje-awlMEdD1xsZ00aJ79EQbI-xZ9n23Fe8mMNr5cTlws2vl3Isv2ogcN_gkC2qRuqy7zHVkJI80y-MbCYjkzDlS8ylm-a-dBIWGG4Eu6BPwWQNTneDZkon1RX6vv9o7J4m7xnJA2N73VlNKH9miWiGGQ2s0OeqPe2bW6HiXuQcEmH6p2UW-YREfk0LlcDDQX0oInexCSu9fm2y1chCwWDmeTcw7cCkddP6Wxo8wbm-hfcno1bVfPmc0Krnr1Mk90d9LXa98Cb9c3UWMKKr4NLAQOnH9ywLBspgszS0C16uHzSZ-3iKVxo5RunCGWhtKDn6ZU9X-q-sIWj8KO6nczQ9ETiAjfVw80qfYt77HW1yRiHzgv1y97UTmRQawM8f95d0QMfGPE9GiTOihcve1Z_tk8S4_cf34i9hkXevyvddWcEAoEnwgzgp5YV6S6QLCWxd0QSywZQ5WZ5DDc2uClAO6Dq4gFtQdiucbWyL0KifuF5c-ramBWk38YdXMG-2ven6C7b7uZJ2l8bWixeFmVS3VRnRDR2GRjXgZJd7sVt1KHS29LzDjEp4dORQPxvmTPcXR7VbspFBjuQEvuejszUvwyfwRRKo9Wu_5CBY2WzbCaoX483Wtzhz_-KrnVxKgrdBB6bh0KSWVjogtSpg0zRgBl76BQezfc-JjJ9ZMNJiEzPn92ItB2gQ8U4-z9J2rwDXHynKIgzHT-UHwleLoQ220AUi6t-72D9ErF6oVNbmP5ylRLMqNTlkK67Fe5278IgAfehFEj0Re6e8Oz3Lf6Weyxz68A3Dzg-j6W3rYiOVi27kRC9FB_vFqFV54SMKkegV1yqYIrTRbSskjt36pb35YQ47qT3MGMDekKDxeWF8TpD7r5lQLhfdO3czgV9OL_rHLTYxQ0eOk1RHZ3KFTmQHLZa2jLBTDFBP52AY0czL8MBf0QFiYHnxdFr1ewWgGh9Y5E_RKBNEA-pB8iBQ_jKhGt3CT0ks4rYDbLMgRQlqNXlFh9UMl6lekIFF5R_hTapnfj4UnIHdaDFridgTFRQDBoyi_xKjwnyGnfsFRLzuT9L5xec7NnmDzTqTn5y03GDfaUng2AalQw0q4Dp0Ittdj_bo0m-bFcKKd0e3oV2eyxOp4HB0WaIpx6ri5qWLKguc7aJs2YiuAzgpWR9kYacIuNUaA_obdCaXIxWRARJJ9hUqQ_TUZ06VZWBPs9e8CKmrBFed2CXPJfCwhsKDMVP4ujgwqPiD4U4Swdj3qs7rYVToPIr7piA3bgHcziQwjZike4Pl6ZnYcmSRMcYLP8H8ErGZlPtSjgOrjKfv5-KFUWC6UsY5Dyi-l7Saa-DrXCt1hdP1fYZbZVlU7s9X3fo8vCDKt_nw3gvKxIK59DZ6Ubyqaz1XG7HgTP7o58JvA6hvgm_9HVYYFU-P2S-dJwUdx2TKI_07EOLuTz2cg5BTWQX489Vla9Z8k-SDhUHr8AhRDP3rohvF4zPgR_KgfDgBWntA6bEah0v21kyitz4X8365hAGiToJbfqeA5VQ1eZMXwNYZjYz6HodV_aCk7n_yH-TC_RJz9TbxikJC77kG409FG3ACH73VHwmyioul68eWBcRHYDsO-HIWIbHZBoVM7E84SksN7a1fqE_3nYaQgh7izjU41WofDm7AHVyVRt_EmUfYgaeahItdEvhq3j9BH3TOzEzCRY_g0qY0CU4nJK045cq_vwQvBDKyqBwW9fG3f6OtbsNhIR8JT769mkrdd6dIQePfo1ytoSyRv6RAQOWVDOYVbhGWc8hLrQGIPLJF9j5pzDMZSqarLNDFE8LKhOOkv8n2J0NI0iI27n4o4GF2QYWyXxJDOc1qlrtsjne1Ze8Y4hyoiW5Zg5XMr_rTSofJ5n7CkQOOOQHRYov38o6zl1-fyXzqi9STINzdijqpfDeOUQLLAWEykUOcnlBTZHAyufNdMqVDgGaicxx8hEiuSLOHb1szl7vEuNguEsF0lqO6-jUV_wP1pikokDjCvltIJ6ewC3V6gMuQeBGW4jQ23PufHp7ZX06245yYNcYJtYfVQKmP1i00z7HPoXAwZWW29qyPnr7bURhzW_Vz01A9aeETQ3aKJYML650C8Es40f9eZT_X4_7cW781622HiYohyOvcFXSlGl7srmXm8rAFaPraKc1RFZA8D2D80DyMz1rewW0TNLHp8gbO8BsidGMHRWYNO_szMZRCz_iBP-RDqVTewa6TLsfQTm43zDNvsUKvn18k3IdaqyQjwGU47x8iPsetPMBqeZxdHQZX3BAFWChi5aU5q9PuRVKjJCKpfIljKG78hUD1MSZDLMWmdBgUrgPEiXpfp5_QF-jqn2hej9MqPZdufj2Ipe-IfV5a-TeJ0KCtsEh-YpDaU3MfjJGoS5Q12sWVdHacdbNImFhZC-6oqXzl2K0PrTHsOZwB8Eb-Chn3FLHUTbS9L7N9GFha3CtXHScjZ9eoVm17LMQwhFXM1SEJtxz5udkhC2-4ME5-lplJlWpFWoeUL0quq3oLD0dR9JFjkEBxgDJA1p0MhdkTl9L1vCwEQvQ8o4OyIC1A_KDVA6EdACQKxlk26QXqMJqZeYFG0tANaua8PAf25dGHlYLencaCCcEvCwxlZ1dV_fmGjMF6Kx1xZSLNOvrw8QX4M9Ml1gYkvqCBxFm1uidsxwx1v8A5WDW8_alYJ9nyF7RHqOBmGCGEk0vCweg_qR6Eci9Vn0SvaWHYCWnEbcGK0fVEbOA0ar1y5H04mjTaeMiusVu543K4x_1ji130gnuufP329PJy6JggyWyxhfFSQ4K02HTV1_K7rtUC9faYr20wKn-MJyhdzWTXIMpCVYQ-dSYLCdyqHinoosJeizRyiBbvNqeyLT52voQvK2-YzVh9JfTfb0WW4n_jeDEeLFVA7huPx4cQpv-rXfVt7YbBYNkFgV4Aa9pNLvKFJvmtDZhy-iNNXy9Lb8_qUY_WRn57_mO0)
+
+**4.3.5 Mockups de Interfaces Principales**
 
 [Incluya bocetos o mockups de las pantallas principales:]
 - Pantalla de login
@@ -2845,120 +3064,6 @@ TIPOS DE TRAZABILIDAD:
 
 <br>
 
-### 4.5 Criterios de evaluación
-
-<!--
-Esta subsección es especialmente valiosa para contextos ACADÉMICOS.
-Define cómo se evaluará la calidad de este SRS y del sistema final.
--->
-
-**Criterios de Evaluación del Documento SRS:**
-
-| Criterio | Peso | Descripción |
-|----------|------|-------------|
-| **Completitud** | 25% | ¿Están todas las secciones completas? ¿Se documentaron todos los requisitos esenciales? |
-| **Claridad y precisión** | 25% | ¿Los requisitos son claros, sin ambigüedades, y precisos? ¿Usan lenguaje apropiado? |
-| **Verificabilidad** | 20% | ¿Cada requisito puede ser probado/verificado? ¿Tiene criterios de aceptación claros? |
-| **Consistencia** | 15% | ¿Los requisitos son consistentes entre sí? ¿No hay contradicciones? |
-| **Formato IEEE 830** | 10% | ¿Sigue correctamente la estructura del estándar IEEE 830? |
-| **Calidad técnica** | 5% | ¿Los requisitos son realistas y técnicamente posibles? ¿Reflejan buenas prácticas? |
-
-**Criterios de Aceptación del Sistema Implementado:**
-
-| Criterio | Descripción |
-|----------|-------------|
-| **Requisitos funcionales esenciales** | Todos los RF marcados como "Esenciales" deben estar implementados y funcionando correctamente |
-| **Requisitos no funcionales críticos** | Rendimiento, seguridad, y disponibilidad deben cumplir mínimos especificados |
-| **Pruebas exitosas** | Todas las pruebas de aceptación definidas deben pasar exitosamente |
-| **Documentación completa** | Manuales de usuario y administrador entregados |
-| **Capacitación completada** | Personal capacitado según especificación |
-| **Migración de datos exitosa** | Datos legacy importados correctamente sin pérdidas |
-| **Período de estabilización** | 2 semanas de operación en producción sin errores críticos |
-
----
-
-## CHECKLIST FINAL PARA ESTUDIANTES
-
-Antes de entregar su SRS, verifique:
-
-**Sección 1 - Introducción:**
-- [ ] 1.1 Propósito: Explica claramente para qué es el documento y quién lo usará
-- [ ] 1.2 Alcance: Define qué incluye y qué NO incluye el sistema
-- [ ] 1.3 Personal: Tabla completa con roles y contactos
-- [ ] 1.4 Definiciones: Todos los términos técnicos están definidos
-- [ ] 1.5 Referencias: Se listan todos los documentos/estándares referenciados
-- [ ] 1.6 Resumen: Descripción breve de las demás secciones
-
-**Sección 2 - Descripción General:**
-- [ ] 2.1 Perspectiva: Contexto del sistema, diagrama de contexto incluido
-- [ ] 2.2 Funciones: Lista de funciones principales (alto nivel)
-- [ ] 2.3 Usuarios: Todos los tipos de usuarios caracterizados
-- [ ] 2.4 Restricciones: Todas las limitaciones documentadas
-- [ ] 2.5 Suposiciones: Suposiciones y dependencias identificadas
-- [ ] 2.6 Requisitos futuros: Funcionalidades planificadas para versiones futuras
-
-**Sección 3 - Requisitos Específicos:**
-- [ ] 3.1 RF: Al menos 20-30 requisitos funcionales bien especificados
-- [ ] 3.2 Interfaces: UI, Hardware, Software, Comunicación especificados
-- [ ] 3.3 RNF: Rendimiento, fiabilidad, disponibilidad, seguridad, etc.
-- [ ] Todos los requisitos tienen ID único
-- [ ] Todos los requisitos son verificables
-- [ ] Todos los requisitos tienen prioridad asignada
-
-**Sección 4 - Apéndices:**
-- [ ] 4.1 Casos de uso: Al menos 3-5 casos de uso documentados
-- [ ] 4.2 Glosario: Términos adicionales si es necesario
-- [ ] 4.3 Diagramas: Al menos diagrama de contexto y ER de BD
-- [ ] 4.4 Trazabilidad: Matriz requisitos-casos de uso
-- [ ] 4.5 Criterios: Criterios de evaluación definidos
-
-**Calidad General:**
-- [ ] Eliminados TODOS los comentarios HTML <!-- -->
-- [ ] Eliminados TODOS los textos entre [corchetes] de orientación
-- [ ] Ortografía y gramática revisadas
-- [ ] Formato consistente en todo el documento
-- [ ] Tablas y diagramas legibles
-- [ ] Numeración correcta de secciones
-- [ ] Índice actualizado con todos los enlaces funcionando
-- [ ] Control de versiones actualizado
-- [ ] Nota aclaratoria académica presente
-
----
-
-## RECURSOS ADICIONALES PARA ESTUDIANTES
-
-**Bibliografía Recomendada:**
-1. IEEE Std 830-1998 - IEEE Recommended Practice for Software Requirements Specifications
-2. Sommerville, I. - Ingeniería de Software (Capítulos sobre requisitos)
-3. Pressman, R. - Ingeniería del Software (Secciones de análisis de requisitos)
-4. Wiegers, K. - Software Requirements (libro completo sobre requisitos)
-
-**Herramientas Útiles:**
-- **Diagramas**: Draw.io, Lucidchart, PlantUML
-- **Mockups**: Figma, Balsamiq, Adobe XD
-- **Control de versiones**: Git + GitHub/GitLab
-- **Colaboración**: Google Docs (para borradores), Notion
-- **Gestión de requisitos**: JIRA, Trello (para proyectos más grandes)
-
-**Sitios Web de Referencia:**
-- https://requirements.seilevel.com/ - Recursos sobre ingeniería de requisitos
-- https://www.modernanalyst.com/ - Artículos y plantillas para analistas
-- https://reqview.com/doc/iso-iec-ieee-29148-templates - Plantillas de requisitos
-
----
-
-**¡Éxito con su proyecto!**
-
-Este documento es una herramienta educativa. Úselo como guía, pero adapte según
-las necesidades específicas de su proyecto y las indicaciones de su docente.
-
-La especificación de requisitos es una habilidad fundamental en ingeniería de
-software. Practique escribiendo requisitos claros, precisos, y verificables.
-
-**Recuerde**: Un buen SRS es la base de un proyecto exitoso. Vale la pena invertir
-tiempo en hacerlo bien desde el inicio.
-
----
 
 *Plantilla elaborada con propósitos académicos*  
 *Basada en IEEE Std 830-1998*  
